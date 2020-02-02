@@ -1,50 +1,32 @@
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Scanner;
+import java.net.InetAddress;
+import java.net.SocketException;
 
 public class Server {
 
 	public static void main(String[] args) {
-		/*try {
-			ServerSocket serverSocket = new ServerSocket(1234);
-			Socket connection = serverSocket.accept();
-			Scanner streamReader = new Scanner(connection.getInputStream());
-			String data = streamReader.nextLine();
-			System.out.println("Request: " + data);
-			streamReader.close();
-			connection.close();
-			serverSocket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}*/
-		
-		
 		
 		try {
+			// Bind port
 			DatagramSocket socket = new DatagramSocket(1234);
-
-			byte[] buffer = new byte[10];
 			
 			while(true) {
-				
+				// Listen for data from client
+				byte[] buffer = new byte[1024];
 				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
-				
-				System.out.println("Waiting for request...");
 				socket.receive(request);
 				
-				String data = new String(request.getData());
-				System.out.println("Request: " + data);
-				
-				
+				// Send data to client
+				String data = "Hello client";
+				byte[] responseBuffer = data.getBytes();
+				DatagramPacket response = new DatagramPacket(responseBuffer, responseBuffer.length, request.getAddress(), request.getPort());
+				socket.send(response);
 			}
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	
 		
 	}
 	

@@ -1,45 +1,36 @@
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.Socket;
+import java.net.SocketException;
 
 public class Client {
 
 	public static void main(String[] args) {
 		
-		/*try {
-			System.out.println("Connect to server...");
-			Socket connection = new Socket("52.77.255.22", 1234);
-			OutputStreamWriter streamWriter = new OutputStreamWriter(connection.getOutputStream());
-			streamWriter.write("Hi server\n");
-			streamWriter.flush();
-			connection.close();
-			System.out.println("Done");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}*/
-		
 		try {
 			DatagramSocket socket = new DatagramSocket(0);
-			socket.setSoTimeout(3000);
-			String data = args[0];
+			//socket.setSoTimeout(3000);
+			
+			// Send data to server
+			String data = "Hello server";
 			byte[] buffer = data.getBytes();
-			
-			InetAddress address = InetAddress.getByName("52.77.255.22");
-			DatagramPacket request = new DatagramPacket(buffer, buffer.length, address, 1234);
-			
-			System.out.println("Sending request with lenght: " + buffer.length);
+			InetAddress serverAddress = InetAddress.getByName("localhost");
+			DatagramPacket request = new DatagramPacket(buffer, buffer.length, serverAddress, 1234);
 			socket.send(request);
-			System.out.println("Success");
+			
+			// Receive data from server
+			byte[] responseBuffer = new byte[1024];
+			DatagramPacket response = new DatagramPacket(responseBuffer, responseBuffer.length);
+			socket.receive(response);
+			String responseData = new String(response.getData(), 0, response.getLength());
+			System.out.println("Response: " + responseData);
 			
 			socket.close();
 			
 		} catch (Exception e) {
-			System.out.println("Fail");
 			e.printStackTrace();
 		}
+		
 	}
 	
 }
