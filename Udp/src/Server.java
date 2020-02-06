@@ -15,6 +15,7 @@ public class Server {
 				// Listen for data from client
 				byte[] buffer = new byte[1024];
 				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
+				System.out.println("Waiting for client...");
 				socket.receive(request);
 				
 				// Send data to client
