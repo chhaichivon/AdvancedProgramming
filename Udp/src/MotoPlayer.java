@@ -4,6 +4,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.ImageIcon;
 import java.awt.event.MouseMotionAdapter;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.SocketException;
 import java.awt.event.MouseEvent;
 
 public class MotoPlayer {
@@ -12,6 +16,9 @@ public class MotoPlayer {
 	private JLabel lblCar;
 	private JLabel lblMoto;
 
+	private DatagramSocket socket;
+	private DatagramPacket carPlayerPacket;
+	
 	/**
 	 * Launch the application.
 	 */
@@ -33,6 +40,17 @@ public class MotoPlayer {
 	 */
 	public MotoPlayer() {
 		initialize();
+		
+		// Create socket and bind to port 1234
+		try {
+			socket = new DatagramSocket(1234);
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
+		
+		// Start ReceiverThread
+		ReceiverThread thread = new ReceiverThread();
+		thread.start();
 	}
 
 	/**
@@ -46,6 +64,18 @@ public class MotoPlayer {
 				
 				lblMoto.setBounds(e.getX(), e.getY(), lblMoto.getWidth(), lblMoto.getHeight());
 				
+				if(carPlayerPacket == null) {
+					return;
+				}
+				
+				// Send X,Y to CarPlayer
+				String data = e.getX() + "#" + e.getY();
+				DatagramPacket packet = new DatagramPacket(data.getBytes(), data.length(), carPlayerPacket.getAddress(), carPlayerPacket.getPort());
+				try {
+					socket.send(packet);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
 			}
 		});
 		frmCar.setTitle("Moto");
@@ -62,5 +92,48 @@ public class MotoPlayer {
 		lblMoto.setIcon(new ImageIcon("/Users/leapkh/Developer/java/AdvancedProgramming/Udp/img/motorcycle.png"));
 		lblMoto.setBounds(18, 117, 48, 28);
 		frmCar.getContentPane().add(lblMoto);
+		
 	}
+	
+	class ReceiverThread extends Thread {
+		@Override
+		public void run() {
+			
+			while(true) {
+				// Receive data from CarPlayer
+				DatagramPacket packet = new DatagramPacket(new byte[AppConstant.BUFFER_SIZE], AppConstant.BUFFER_SIZE);
+				try {
+					// Listen data from CarPlayer
+					socket.receive(packet);
+					
+					// Store the data to get address and port for sending back to CarPlayer
+					carPlayerPacket = packet;
+					
+					// Extract X, Y from data. E.g.: 100#200
+					String data = new String(packet.getData(), 0, packet.getLength());
+					String[] parts = data.split("#");
+					int x = Integer.parseInt(parts[0]);
+					int y = Integer.parseInt(parts[1]);
+					
+					lblCar.setBounds(x, y, lblCar.getWidth(), lblCar.getHeight());
+					
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			
+		}
+	}
+	
 }
+
+
+
+
+
+
+
+
+
+
+

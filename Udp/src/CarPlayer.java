@@ -4,6 +4,11 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.ImageIcon;
 import java.awt.event.MouseMotionAdapter;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
 import java.awt.event.MouseEvent;
 
 public class CarPlayer {
@@ -11,6 +16,8 @@ public class CarPlayer {
 	private JFrame frmCar;
 	private JLabel lblCar;
 	private JLabel lblMoto;
+	
+	private DatagramSocket socket;
 
 	/**
 	 * Launch the application.
@@ -33,6 +40,17 @@ public class CarPlayer {
 	 */
 	public CarPlayer() {
 		initialize();
+		
+		// Create socket
+		try {
+			socket = new DatagramSocket(0);
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
+		
+		// Start ReceiverThread
+		ReceiverThread thread = new ReceiverThread();
+		thread.start();
 	}
 
 	/**
@@ -45,6 +63,16 @@ public class CarPlayer {
 			public void mouseMoved(MouseEvent e) {
 				
 				lblCar.setBounds(e.getX(), e.getY(), lblCar.getWidth(), lblCar.getHeight());
+				
+				// Send X,Y to MotoPlayer
+				try {
+					String data = e.getX() + "#" + e.getY();
+					InetAddress motoPlayerAddress = InetAddress.getByName("localhost");
+					DatagramPacket packet = new DatagramPacket(data.getBytes(), data.length(), motoPlayerAddress, 1234);
+					socket.send(packet);
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
 				
 			}
 		});
@@ -63,4 +91,38 @@ public class CarPlayer {
 		lblMoto.setBounds(18, 117, 48, 28);
 		frmCar.getContentPane().add(lblMoto);
 	}
+	
+	class ReceiverThread extends Thread {
+		@Override
+		public void run() {
+			while(true) {
+				// Receive data from CarPlayer
+				DatagramPacket packet = new DatagramPacket(new byte[AppConstant.BUFFER_SIZE], AppConstant.BUFFER_SIZE);
+				try {
+					// Listen data from CarPlayer
+					socket.receive(packet);
+					
+					// Extract X, Y from data. E.g.: 100#200
+					String data = new String(packet.getData(), 0, packet.getLength());
+					String[] parts = data.split("#");
+					int x = Integer.parseInt(parts[0]);
+					int y = Integer.parseInt(parts[1]);
+					
+					lblMoto.setBounds(x, y, lblMoto.getWidth(), lblMoto.getHeight());
+					
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
 }
+
+
+
+
+
+
+
+
