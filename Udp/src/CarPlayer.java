@@ -2,6 +2,9 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+
+import com.google.gson.Gson;
+
 import javax.swing.ImageIcon;
 import java.awt.event.MouseMotionAdapter;
 import java.io.IOException;
@@ -23,6 +26,11 @@ public class CarPlayer {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		
+		
+		
+		
+		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -51,6 +59,11 @@ public class CarPlayer {
 		// Start ReceiverThread
 		ReceiverThread thread = new ReceiverThread();
 		thread.start();
+		
+		
+		Gson gson = new Gson();
+		String jsonString = gson.toJson(lblCar);
+		
 	}
 
 	/**
