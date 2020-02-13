@@ -3,8 +3,6 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-import com.google.gson.Gson;
-
 import javax.swing.ImageIcon;
 import java.awt.event.MouseMotionAdapter;
 import java.io.IOException;
@@ -60,9 +58,6 @@ public class CarPlayer {
 		ReceiverThread thread = new ReceiverThread();
 		thread.start();
 		
-		
-		Gson gson = new Gson();
-		String jsonString = gson.toJson(lblCar);
 		
 	}
 
