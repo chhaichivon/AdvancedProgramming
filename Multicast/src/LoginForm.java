@@ -20,6 +20,8 @@ public class LoginForm {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		// Set IPv4 for Mac
+		System.setProperty("java.net.preferIPv4Stack", "true");
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
